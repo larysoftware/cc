@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Service\Catalog\Product;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -55,17 +54,25 @@ class Cart implements \App\Service\Cart\Cart
     #[Pure]
     public function hasProduct(\App\Entity\Product $product): bool
     {
-        return $this->cartProducts->contains($product);
+        foreach ($this->cartProducts as $cartProduct) {
+            if ($cartProduct->getProduct()->getId() === $product->getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function addProduct(\App\Entity\Product $product): void
     {
-        $cartProduct = new CartProducts($this, $product);
-        $this->cartProducts->add($cartProduct);
+        $this->cartProducts->add(new CartProducts($this, $product));
     }
 
     public function removeProduct(\App\Entity\Product $product): void
     {
-        $this->cartProducts->removeElement($product);
+        foreach ($this->cartProducts as $cartProduct) {
+            if ($cartProduct->getProduct()->getId() === $product->getId()) {
+                $this->cartProducts->removeElement($cartProduct);
+            }
+        }
     }
 }
